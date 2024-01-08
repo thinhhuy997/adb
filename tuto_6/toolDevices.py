@@ -42,6 +42,8 @@ def GetDevices():
 GetDevices()
 thread_count = len(GetDevices())
 
+print(GetDevices())
+
 class starts(threading.Thread):
     def __init__(self, nameLD, i):
         super().__init__()
@@ -50,48 +52,54 @@ class starts(threading.Thread):
     def run(self):
         device = self.device
         d = Auto(device)
-        def memus():
-            print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m nhap 1 dê mo Face | Time:", time.ctime(time.time()))
-            print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
-            print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
-            memusn = int(input("Nhap memu can chon: "))
-            if memusn ==1:
-                step1(d)
-            if memusn ==2:
-                step2(d)
+
+        print('test')
+
+        # def memus():
+        #     print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m nhap 1 dê mo Face | Time:", time.ctime(time.time()))
+        #     print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
+        #     print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
+        #     memusn = int(input("Nhap memu can chon: "))
+        #     if memusn ==1:
+        #         step1(d)
+        #     if memusn ==2:
+        #         step2(d)
             
-        def step2(d):
-            while True:
-                try:
-                    poin  = d.find('2.png')
-                    if poin > [(0, 0)] :
-                        d.click(poin[0][0],poin[0][1])
-                        memus()
-                        print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
-                        break
-                except:
-                    return 0
-        def step1(d):
-            while True:
-                try:
-                    poin  = d.find('2.png')
-                    if poin > [(0, 0)] :
-                        d.click(poin[0][0],poin[0][1])
-                        print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
-                        break
-                except:
-                    return 0
+        # def step2(d):
+        #     while True:
+        #         try:
+        #             poin  = d.find('2.png')
+        #             if poin > [(0, 0)] :
+        #                 d.click(poin[0][0],poin[0][1])
+        #                 memus()
+        #                 print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
+        #                 break
+        #         except:
+        #             return 0
+        # def step1(d):
+        #     while True:
+        #         try:
+        #             poin  = d.find('2.png')
+        #             if poin > [(0, 0)] :
+        #                 d.click(poin[0][0],poin[0][1])
+        #                 print(" \033[1;31m |\033[1;37m[",self.nameLD,"]\033[1;31m Mở Face | Time:", time.ctime(time.time()))
+        #                 break
+        #         except:
+        #             return 0
         
-        memus()           
+        # memus()           
         
 
 
         
 def main(m):
         device = GetDevices()[m]
-        for i in range(m, 1, thread_count):
+        for i in range(m, 2, thread_count):
+                run = starts(device,device,)
                 print(device)
-                # run = starts(device,device,)
-                # run.run()
+                run.run()
+
 for m in range(thread_count):
     threading.Thread(target=main, args=(m,)).start()
+
+print('thread_count:', thread_count)
