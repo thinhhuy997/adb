@@ -8,6 +8,8 @@ except:
 import threading,subprocess,base64,cv2,random
 import numpy as np
 from datetime import datetime
+from com.dtmilano.android.viewclient import ViewClient
+
 
 class Auto:
     def __init__(self,handle):
@@ -28,7 +30,11 @@ class Auto:
         loc = np.where(result >= threshold)
         test_data = list(zip(*loc[::-1]))
         return test_data
-    
+    def sendText(self, text: str) -> None:
+        os.system(f"adb -s {self.handle} shell input text '{text}'")
+    def enter(self) -> None:
+        os.system(f"adb -s {self.handle} shell input keyevent 66")
+
 def GetDevices():
         devices = subprocess.check_output("adb devices")
         p = str(devices).replace("b'List of devices attached","").replace('\\r\\n',"").replace(" ","").replace("'","").replace('b*daemonnotrunning.startingitnowonport5037**daemonstartedsuccessfully*Listofdevicesattached',"")
@@ -44,21 +50,107 @@ class EmulatorWorker(threading.Thread):
         super().__init__()
         self.nameLD = nameLD
         self.device = i
+
+    def startApp(self, adb_auto: Auto, app_img_path: str) -> None:
+        while True:
+            try:
+                img_point = adb_auto.find(app_img_path)
+                if img_point > [(0,0)]:
+                    adb_auto.click(img_point[0][0], img_point[0][1])
+                    print('1')
+                    time.sleep(5)
+                    device, serialno = ViewClient.connectToDeviceOrExit()
+                    device.takeSnapshot().crop((100, 50, 500, 600)).save('./images/myscreencap.png', 'PNG')
+                    print('2')
+
+                    break
+            except Exception as e:
+                print("Err", e)
+
+    def searchLiveStream(self, adb_auto: Auto, search_img_path: str, page_name: str, live_tag_img_path_1: str, live_tag_img_path_2: str) -> bool:
+        while True:
+            try:
+                img_point = adb_auto.find(search_img_path)
+                print('img_point', img_point)
+                print(search_img_path)
+                if img_point > [(0,0)]:
+                    adb_auto.click(img_point[0][0], img_point[0][1])
+
+                    time.sleep(2)
+                    adb_auto.sendText(page_name)
+                    adb_auto.enter()
+
+                    time.sleep(2)
+                    live_img_point_1 = adb_auto.find(live_tag_img_path_1)
+                    live_img_point_2 = adb_auto.find(live_tag_img_path_2)
+                    print('live_img_point_1', live_img_point_1)
+                    print('live_img_point_2', live_img_point_2)
+
+                    # Because There are 2 live-image tags, need to check twice
+                    if live_img_point_1 > [(0, 0)]:
+                        adb_auto.click(live_img_point_1[0][0], live_img_point_1[0][1])
+                        return True # Search livestream successfully!
+                    if live_img_point_2 > [(0, 0)]:
+                        adb_auto.click(live_img_point_2[0][0], live_img_point_2[0][1])
+                        return True # Search livestream successfully!
+
+            except Exception as e:
+                print(e)
+                return False
+            
+            return False
+        
+    def interactLiveStream(self, adb_auto: Auto, captcha_img_path: str) -> None:
+
+        device, serialno = ViewClient.connectToDeviceOrExit()
+        device.takeSnapshot().crop((100, 50, 500, 600)).save('./myscreencap.png', 'PNG')
+
+
+        # count = 0
+        # while True:
+        #     captcha_img_point = adb_auto.find(captcha_img_path)
+        #     if captcha_img_point > [(0, 0)]:
+        #         print(f'Captcha xuất hiện khi count = {count}')
+        #     count+=1
+
+
+            
+
+        #     # Check captcha appear every 10 seconds
+        #     time.sleep(10)
+
     def run(self):
         try:
             device = self.device
-            d = Auto(device)
+            adb_auto = Auto(device)
+
+            app_img_path = "./images/tiktok-1.png"
+
+            search_img_path = "./images/search-1.png"
+            page_name = "xuong jogger"
+            live_tag_img_path_1 = "./images/live-tag-1.png"
+            live_tag_img_path_2 = "./images/live-tag-2.png"
+
+            captcha_img_path = "./images/captcha-1.png"
+
             print('--------------------')
             print(f"Device {device} started")
 
-            while True:
-                try:
-                    anh1=d.find("./images./app-store.png")
-                    if anh1 > [(0,0)]:
-                        d.click(anh1[0][0], anh1[0][1])
-                        break
-                except Exception as e:
-                    print(e)
+            # Start the application that needs the operation
+            self.startApp(adb_auto, app_img_path)
+            time.sleep(2)
+
+            # Search the tiktok livestream that needs the operation
+            live_check = self.searchLiveStream(adb_auto, search_img_path, page_name, live_tag_img_path_1, live_tag_img_path_2)
+            time.sleep(2)
+
+            # Interact with the livestream if it is found
+            if live_check:
+                self.interactLiveStream(adb_auto, captcha_img_path)
+                
+            else:
+                print(f'Livestream "{page_name}" không được tìm thấy')
+
         except Exception as e:
             print(e)
     
